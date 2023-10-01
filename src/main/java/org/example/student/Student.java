@@ -1,5 +1,10 @@
 package org.example.student;
 
-public class Student {
+import java.util.UUID;
 
+public class Student {
+    private UUID id;
+    private String name;
+    private String email;
+    private String password;
 }
