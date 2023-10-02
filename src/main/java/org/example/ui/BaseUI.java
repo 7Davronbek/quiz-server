@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 import static org.example.Main.*;
 
 public class BaseUI {
-    private static StudentService studentService = StudentService.getInstance();
+    private static final StudentService studentService = StudentService.getInstance();
 
     public void quizstart() throws SQLException, MessagingException, IOException {
 
@@ -43,12 +43,6 @@ public class BaseUI {
             switch (command) {
                 case 1 -> signUp();
                 case 2 -> logIn();
-                case 1 -> {
-                    signUp();
-                }
-                case 2 -> {
-                    logIn();
-                }
                 case 0 -> isExit = true;
                 default -> wrongCommand();
             }
