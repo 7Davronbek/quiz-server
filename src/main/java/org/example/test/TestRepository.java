@@ -64,6 +64,8 @@ public class TestRepository {
                 String title = resultSet.getString("title");
                 String examType = resultSet.getString("exam_type");
                 String examCategory = resultSet.getString("category_type");
+                String examType = resultSet.getString("testType");
+                String examCategory = resultSet.getString("testCategory");
                 String ownerUUID = resultSet.getString("owner_id");
 
                 Test test = new Test(UUID.fromString(id), title, TestType.valueOf(examType), TestCategory.valueOf(examCategory), UUID.fromString(ownerUUID));
@@ -79,6 +81,7 @@ public class TestRepository {
                 select *
                 from test
                 where id = ?
+                select * from test where id = ?
                 """;
 
         try (Connection connection = Database.getConnection()) {
@@ -92,6 +95,8 @@ public class TestRepository {
             String title = resultSet.getString("title");
             String examType = resultSet.getString("exam_type");
             String examCategory = resultSet.getString("category_type");
+            String examType = resultSet.getString("testType");
+            String examCategory = resultSet.getString("testCategory");
             String ownerUUID = resultSet.getString("owner_id");
             return new Test(UUID.fromString(id), title, TestType.valueOf(examType), TestCategory.valueOf(examCategory), UUID.fromString(ownerUUID));
 
@@ -111,7 +116,6 @@ public class TestRepository {
             preparedStatement.setString(1, test.getTitle());
             preparedStatement.setString(2, String.valueOf(test.getTestType()));
             preparedStatement.setString(3, String.valueOf(test.getTestCategory()));
-
             preparedStatement.setString(4, String.valueOf(testId));
             preparedStatement.setString(5, String.valueOf(ownerId));
 

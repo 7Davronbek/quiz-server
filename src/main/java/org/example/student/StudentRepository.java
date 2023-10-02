@@ -67,7 +67,6 @@ public class StudentRepository {
             String emial = resultSet.getString("email");
             String password = resultSet.getString("password");
             Student student = new Student(uuid, name, emial, password);
-            System.out.println(student);
             return student;
         }
         return null;
