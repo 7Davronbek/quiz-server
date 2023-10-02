@@ -43,12 +43,6 @@ public class BaseUI {
             switch (command) {
                 case 1 -> signUp();
                 case 2 -> logIn();
-                case 1 -> {
-                    signUp();
-                }
-                case 2 -> {
-                    logIn();
-                }
                 case 0 -> isExit = true;
                 default -> wrongCommand();
             }
@@ -127,8 +121,8 @@ public class BaseUI {
             Exam_Type examType1 = Exam_Type.valueOf(examType);
             Category_Type categoryType1 = Category_Type.valueOf(categoryType);
 
-            Test test = new Test(testId, title, examType1, categoryType1, ownerId);
-            tests.add(test);
+            /*Test test = new Test(testId, title, examType1, categoryType1, ownerId);*/
+            /*tests.add(test);*/
         }
         if (tests.size() > 0) {
             int count = 1;
@@ -183,30 +177,40 @@ public class BaseUI {
             preparedStatement.setString(2, desc);
             preparedStatement.setString(3, testType);
             preparedStatement.setString(4, testCategory);
-            preparedStatement.setString(5, "19790fa8-e57c-432d-884a-e59a297d62f5");
+            preparedStatement.setString(5, "6f99d07d-04aa-4f23-8df9-a3a47051142e");
 
             preparedStatement.execute();
-           /* System.out.println("Test has been created successfully.");
+            /*  System.out.println("Test has been created successfully.");*/
+            boolean chek = true;
+            while (chek) {
+                System.out.print("Enter option name: ");
+                String optionName = scannerStr.nextLine();
 
-            System.out.print("Enter option name: ");
-            String optionName=scannerStr.nextLine();
+                System.out.print("Is correct answer(T/F); ");
+                String isCorrect = scannerStr.nextLine();
+                boolean isTrue = false;
+                if (isCorrect.equals("T")) {
+                    isTrue = true;
+                }
 
-            System.out.print("Is correct answer(T/F); ");
-            String isCorrect = scannerStr.nextLine();
-            boolean isTrue = isCorrect.equals("T");
+                String insertOptionQuery = "INSERT INTO option(exam_id,option_name,is_correct)VALUES(?::uuid,?,?::boolean)";
 
-            String insertOptionQuery = "INSERT INTO option(id,option_name,is_correct)VALUES(?::uuid,?,?)";
+                try (PreparedStatement preparedStatement1 = connection.prepareStatement(insertOptionQuery)) {
 
-            try(PreparedStatement preparedStatement1=connection.prepareStatement(insertOptionQuery)){
-                preparedStatement1.setString(1,stringUUID);
-                preparedStatement1.setString(2,optionName);
-                preparedStatement1.setString(3,isCorrect);
+                    preparedStatement1.setString(1, stringUUID);
+                    preparedStatement1.setString(2, optionName);
+                    preparedStatement1.setString(3, String.valueOf(isTrue));
 
-                preparedStatement1.execute();
-                System.out.println("Variantlar qabul qilindi.");
-            }*/
+                    preparedStatement1.execute();
+                    System.out.println("Variantlar qabul qilindi.");
+                    System.out.println("Yana varinantlar bormi(XA/YOQ)");
+                    String answer = scannerStr.nextLine();
+                    if(!answer.equals("XA")){
+                        chek=false;
+                    }
+                }
+            }
         }
-
     }
 
 
