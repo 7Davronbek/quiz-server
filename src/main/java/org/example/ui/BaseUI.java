@@ -1,6 +1,9 @@
 package org.example.ui;
 
 
+import static org.example.Main.scannerInt;
+import static org.example.Main.wrongCommand;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -38,6 +41,8 @@ public class BaseUI {
                     >> \s""");
             int command = scannerInt.nextInt();
             switch (command) {
+                case 1 -> signUp();
+                case 2 -> logIn();
                 case 1 -> {
                     signUp();
                 }
@@ -49,6 +54,7 @@ public class BaseUI {
             }
         }
     }
+
 
     private void logIn() throws SQLException {
         System.out.print("Emaillinggizni kiriting: ");
