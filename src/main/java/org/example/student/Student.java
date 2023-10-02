@@ -1,10 +1,9 @@
 package org.example.student;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
