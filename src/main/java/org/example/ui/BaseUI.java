@@ -1,19 +1,10 @@
 package org.example.ui;
 
 
-import lombok.SneakyThrows;
-import org.example.database.Database;
-import org.mindrot.jbcrypt.BCrypt;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.UUID;
 
 import static org.example.Main.*;
 
 public class BaseUI {
-    public void quizStart() throws SQLException {
         boolean isExit = false;
         while (!isExit) {
             System.out.print("""
@@ -143,6 +134,65 @@ public class BaseUI {
 
 
     private void signUp() {
+        System.out.print("Ismingizni kiriting ⇒ ");
+        String name = scannerStr.nextLine();
+
+        System.out.print("Emailingizni kiriting ⇒ ");
+        String email = scannerStr.nextLine();
+
+        boolean byEmail = studentService.findByEmail(email);
+        if (byEmail) {
+            System.out.println("Bu email allaqachon ro'yxatdan o'tgan❗");
+        } else {
+            Random random = new Random();
+            int randomNumber = random.nextInt(100000, 999999);
+            sendToEmail(Message.RecipientType.TO, new InternetAddress(email), randomNumber);
+            System.out.println("Emailingizga tasdiqlash kodi yuborildi❗");
+            System.out.print("Tasdiqlash kodini kiriting ⇒ ");
+            int verificationCode = scannerInt.nextInt();
+
+            if (verificationCode == randomNumber) {
+                System.out.print("\nEng kamida 4 ta belgidan iborat yangi parol o'rnating ⇒ ");
+                String password = scannerStr.nextLine();
+                if (password.length() < 4) {
+                    System.out.print("Eng kamida 4 ta belgidan iborat yangi parol o'rnating ⇒ ");
+                } else {
+                    String trimPassword = password.trim();
+                    studentService.addStudent(new Student(UUID.randomUUID(), name, email, trimPassword));
+                    System.out.println("Muvaffaqiyatli ro'yxatdan o'tdingiz❗\n");
+                }
+            } else {
+                System.out.println("Tasdiqlash kodini notog'ri kiritdingiz❗ Qaytadan urinib ko'ring ↻." + "\n");
+            }
+        }
+    }
+
+    public void sendToEmail(Message.RecipientType recipientType, InternetAddress internetAddress, int random) throws IOException, MessagingException, MessagingException {
+        Properties properties = new Properties();
+        properties.load(new FileReader("src/main/resources/application.properties"));
+        String mail = properties.getProperty("mail.gmail");
+        String password = properties.getProperty("myMail.password");
+
+        Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(mail, password);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(mail));
+        message.addRecipient(recipientType, internetAddress);
+        message.setText(String.valueOf(random));
+
+        Executors.newCachedThreadPool().submit(() -> {
+            try {
+                Transport.send(message);
+            } catch (MessagingException e) {
+                throw new RuntimeException();
+            }
+        });
 
     }
+
 }
