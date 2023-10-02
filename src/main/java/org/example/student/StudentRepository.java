@@ -94,18 +94,17 @@ public class StudentRepository {
             Student student = new Student(uuid, name, email, password);
             students.add(student);
         }
-
         return students;
     }
 
-    public boolean findByEmail(String email) {
+    public Student findByEmail(String email) {
         List<Student> all = getAll();
         for (int i = 0; i < all.size(); i++) {
             if (all.get(i).getEmail().equals(email)) {
-                return true;
+                return all.get(i);
             }
         }
-        return false;
+        return null;
     }
 
 }

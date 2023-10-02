@@ -1,10 +1,33 @@
 package org.example.ui;
 
 
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import lombok.SneakyThrows;
+import org.example.database.Database;
+import org.example.student.Student;
+import org.example.student.StudentService;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.Executors;
 
 import static org.example.Main.*;
 
 public class BaseUI {
+    private static StudentService studentService = StudentService.getInstance();
+
+    public void quizstart() throws SQLException, MessagingException, IOException {
+
         boolean isExit = false;
         while (!isExit) {
             System.out.print("""
@@ -15,8 +38,12 @@ public class BaseUI {
                     >> \s""");
             int command = scannerInt.nextInt();
             switch (command) {
-                case 1 -> signUp();
-                case 2 -> logIn();
+                case 1 -> {
+                    signUp();
+                }
+                case 2 -> {
+                    logIn();
+                }
                 case 0 -> isExit = true;
                 default -> wrongCommand();
             }
@@ -32,25 +59,25 @@ public class BaseUI {
         String password = scannerStr.nextLine();
 
 
-        String password1 = "123";
-        String hashedPassword = BCrypt.hashpw(password1, BCrypt.gensalt());
-
-
-        String providedPassword = password;
-        boolean passwordMatches = BCrypt.checkpw(providedPassword, hashedPassword);
+        Student byEmail = studentService.findByEmail(email);
+        if(byEmail==null){
+            System.out.println("bunaqa email yoq");
+            return;
+        }
+        boolean passwordMatches = BCrypt.checkpw(password, byEmail.getPassword());
 
         if (passwordMatches) {
             System.out.println("Muvafaqiyatli kirdinggiz");
-            boolean istrue=true;
-            while (istrue){
+            boolean istrue = true;
+            while (istrue) {
                 System.out.print("""
-                1. Create test
-                2. Start test
-                3. My tests
-                4. Solved tests
-                                    
-                0. Back
-                >> \s""");
+                        1. Create test
+                        2. Start test
+                        3. My tests
+                        4. Solved tests
+                                            
+                        0. Back
+                        >> \s""");
                 int tanlov = scannerInt.nextInt();
                 switch (tanlov) {
                     case 1:
@@ -62,18 +89,17 @@ public class BaseUI {
                     case 4:
                         SolvedTests();
                     case 0:
-                        istrue=false;
+                        istrue = false;
                     default:
                         System.out.println("notogri son kiritinggiz");
 
                 }
             }
         } else {
-            System.out.println("oxshamadi");
+            System.out.println("password yoki email xato kiritinggiz");
         }
-
-
     }
+
 
     @SneakyThrows
     private void SolvedTests() {
@@ -106,7 +132,7 @@ public class BaseUI {
             preparedStatement.setString(2, desc);
             preparedStatement.setString(3, testType);
             preparedStatement.setString(4, testCategory);
-            preparedStatement.setString(5, "e2ad8e28-6d67-4d9c-848c-1552b10cc6e3");
+            preparedStatement.setString(5, "19790fa8-e57c-432d-884a-e59a297d62f5");
 
             preparedStatement.execute();
            /* System.out.println("Test has been created successfully.");
@@ -133,15 +159,16 @@ public class BaseUI {
     }
 
 
-    private void signUp() {
+    private void signUp() throws MessagingException, IOException {
         System.out.print("Ismingizni kiriting ⇒ ");
         String name = scannerStr.nextLine();
 
         System.out.print("Emailingizni kiriting ⇒ ");
         String email = scannerStr.nextLine();
 
-        boolean byEmail = studentService.findByEmail(email);
-        if (byEmail) {
+
+        Student byEmail = studentService.findByEmail(email);
+        if (byEmail!=null) {
             System.out.println("Bu email allaqachon ro'yxatdan o'tgan❗");
         } else {
             Random random = new Random();

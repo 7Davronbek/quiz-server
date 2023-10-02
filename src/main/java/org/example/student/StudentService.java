@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class StudentService {
     private static final StudentRepository studentRepository = StudentRepository.getInstance();
-    private static final StudentService studentService = new StudentService();
+    public static final StudentService studentService = new StudentService();
 
     public void addStudent(Student entity) {
         studentRepository.add(entity);
@@ -27,7 +27,7 @@ public class StudentService {
         return studentService;
     }
 
-    public boolean findByEmail(String email) {
+    public Student findByEmail(String email) {
         return studentRepository.findByEmail(email);
     }
 
