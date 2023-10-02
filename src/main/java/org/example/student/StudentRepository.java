@@ -36,7 +36,6 @@ public class StudentRepository {
         preparedStatement.setString(3, hashedPassword);
         preparedStatement.execute();
         connection.close();
-        System.out.println("Student muvaffaqiyatli qo'shildi \n");
     }
 
     @SneakyThrows
@@ -49,7 +48,6 @@ public class StudentRepository {
         preparedStatement.setObject(1, id);
         preparedStatement.execute();
         connection.close();
-        System.out.println("Student muvaffaqiyatli o'chirildi! \n");
     }
 
     @SneakyThrows
@@ -98,6 +96,16 @@ public class StudentRepository {
         }
 
         return students;
+    }
+
+    public boolean findByEmail(String email) {
+        List<Student> all = getAll();
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

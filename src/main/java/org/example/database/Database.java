@@ -16,9 +16,9 @@ public class Database {
         Properties properties = new Properties();
         try {
             properties.load(new FileReader("src/main/resources/application.properties"));
-            URL = properties.getProperty("database.url");
-            USER = properties.getProperty("database-user");
-            PASSWORD = properties.getProperty("database-password");
+            URL = properties.getProperty("quiz.database.url");
+            USER = properties.getProperty("quiz.database.user");
+            PASSWORD = properties.getProperty("quiz.database.password");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
