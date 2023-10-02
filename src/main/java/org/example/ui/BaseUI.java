@@ -92,7 +92,34 @@ public class BaseUI {
     @SneakyThrows
     private void MyTests(UUID studentId) {
         Student byStudentId = studentService.findByStudentId(studentId);
+
         List<Test> tests = testService.getAllTests();
+
+
+        Connection connection = Database.getConnection();
+        String query = """
+                select * from test where owner_id = ?
+                """;
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setObject(1, byStudentId.getId());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<Test> tests = new ArrayList<>();
+
+        while (resultSet.next()) {
+            String uuid = resultSet.getString("id");
+            UUID testId = UUID.fromString(uuid);
+            String title = resultSet.getString("title");
+            String examType = resultSet.getString("exam_type");
+            String categoryType = resultSet.getString("category_type");
+            String ownerId1 = resultSet.getString("owner_id");
+            UUID ownerId = UUID.fromString(ownerId1);
+            Exam_Type examType1 = Exam_Type.valueOf(examType);
+            Category_Type categoryType1 = Category_Type.valueOf(categoryType);
+
+            /*Test test = new Test(testId, title, examType1, categoryType1, ownerId);*/
+            /*tests.add(test);*/
+        }
+      
         if (tests.size() > 0) {
             int count = 1;
             for (Test test : tests) {
@@ -177,6 +204,7 @@ public class BaseUI {
         String insertTestQuary = "INSERT INTO test(title,exam_type,category_type,owner_id) VALUES (?::uuid,?,?::exam_type_enum,?::category_type_enum,CAST(? AS UUID))";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertTestQuary)) {
+
             preparedStatement.setString(1, desc);
             preparedStatement.setString(2, testType);
             preparedStatement.setString(3, testCategory);
@@ -202,8 +230,47 @@ public class BaseUI {
 //                preparedStatement1.execute();
 //                System.out.println("Variantlar qabul qilindi.");
 //            }
-        }
 
+            UUID uuid = UUID.randomUUID();
+            String stringUUID = uuid.toString();
+            preparedStatement.setString(1, stringUUID);
+            preparedStatement.setString(2, desc);
+            preparedStatement.setString(3, testType);
+            preparedStatement.setString(4, testCategory);
+            preparedStatement.setString(5, "6f99d07d-04aa-4f23-8df9-a3a47051142e");
+
+            preparedStatement.execute();
+            /*  System.out.println("Test has been created successfully.");*/
+            boolean chek = true;
+            while (chek) {
+                System.out.print("Enter option name: ");
+                String optionName = scannerStr.nextLine();
+
+                System.out.print("Is correct answer(T/F); ");
+                String isCorrect = scannerStr.nextLine();
+                boolean isTrue = false;
+                if (isCorrect.equals("T")) {
+                    isTrue = true;
+                }
+
+                String insertOptionQuery = "INSERT INTO option(exam_id,option_name,is_correct)VALUES(?::uuid,?,?::boolean)";
+
+                try (PreparedStatement preparedStatement1 = connection.prepareStatement(insertOptionQuery)) {
+
+                    preparedStatement1.setString(1, stringUUID);
+                    preparedStatement1.setString(2, optionName);
+                    preparedStatement1.setString(3, String.valueOf(isTrue));
+
+                    preparedStatement1.execute();
+                    System.out.println("Variantlar qabul qilindi.");
+                    System.out.println("Yana varinantlar bormi(XA/YOQ)");
+                    String answer = scannerStr.nextLine();
+                    if(!answer.equals("XA")){
+                        chek=false;
+                    }
+                }
+            }
+        }
     }
 
     private void signUp() throws MessagingException, IOException {
@@ -265,7 +332,5 @@ public class BaseUI {
                 throw new RuntimeException();
             }
         });
-
     }
-
 }
