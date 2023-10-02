@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Main {
     public static Scanner scannerInt = new Scanner(System.in);
     public static Scanner scannerStr = new Scanner(System.in);
-    public static StudentService studentService=StudentService.getInstance();
+    public static StudentService studentService = StudentService.getInstance();
 
     public static void main(String[] args) throws SQLException, MessagingException, IOException {
         new BaseUI().quizstart();
