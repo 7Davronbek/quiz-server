@@ -15,4 +15,5 @@ public class Main {
     public static void wrongCommand() {
         System.out.println("Wrong command. Try again");
     }
+
 }
