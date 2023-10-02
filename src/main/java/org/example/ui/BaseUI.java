@@ -11,26 +11,26 @@ import lombok.SneakyThrows;
 import org.example.database.Database;
 import org.example.student.Student;
 import org.example.student.StudentService;
+import org.example.test.Category_Type;
+import org.example.test.Exam_Type;
+import org.example.test.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 import static org.example.Main.*;
 
 public class BaseUI {
-    private static StudentService studentService = StudentService.getInstance();
+    private static final StudentService studentService = StudentService.getInstance();
 
     public void quizstart() throws SQLException, MessagingException, IOException {
-
         boolean isExit = false;
         while (!isExit) {
             System.out.print("""
@@ -60,20 +60,18 @@ public class BaseUI {
         System.out.print("Emaillinggizni kiriting: ");
         String email = scannerStr.nextLine();
 
-
         System.out.print("Password kiriting: ");
         String password = scannerStr.nextLine();
 
-
         Student byEmail = studentService.findByEmail(email);
-        if(byEmail==null){
-            System.out.println("bunaqa email yoq");
+        if (byEmail == null) {
+            System.out.println("Bunaqa email topilmadi!");
             return;
         }
         boolean passwordMatches = BCrypt.checkpw(password, byEmail.getPassword());
 
         if (passwordMatches) {
-            System.out.println("Muvafaqiyatli kirdinggiz");
+            System.out.println("Muvafaqiyatli kirdinggiz \n");
             boolean istrue = true;
             while (istrue) {
                 System.out.print("""
@@ -86,23 +84,16 @@ public class BaseUI {
                         >> \s""");
                 int tanlov = scannerInt.nextInt();
                 switch (tanlov) {
-                    case 1:
-                        CreateTest(Database.getConnection());
-                    case 2:
-                        StartTest();
-                    case 3:
-                        MyTests();
-                    case 4:
-                        SolvedTests();
-                    case 0:
-                        istrue = false;
-                    default:
-                        System.out.println("notogri son kiritinggiz");
-
+                    case 1 -> CreateTest(Database.getConnection());
+                    case 2 -> StartTest();
+                    case 3 -> MyTests(byEmail.getId());
+                    case 4 -> SolvedTests();
+                    case 0 -> istrue = false;
+                    default -> System.out.println("Notog'ri son kiritinggiz");
                 }
             }
         } else {
-            System.out.println("password yoki email xato kiritinggiz");
+            System.out.println("Password yoki email xato kiritinggiz");
         }
     }
 
@@ -112,18 +103,72 @@ public class BaseUI {
 
     }
 
-    private void MyTests() {
+    @SneakyThrows
+    private void MyTests(UUID studentId) {
+        Student byStudentId = studentService.findByStudentId(studentId);
+
+        Connection connection = Database.getConnection();
+        String query = """
+                select * from test where owner_id = ?
+                """;
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setObject(1, byStudentId.getId());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        List<Test> tests = new ArrayList<>();
+
+        while (resultSet.next()) {
+            String uuid = resultSet.getString("id");
+            UUID testId = UUID.fromString(uuid);
+            String title = resultSet.getString("title");
+            String examType = resultSet.getString("exam_type");
+            String categoryType = resultSet.getString("category_type");
+            String ownerId1 = resultSet.getString("owner_id");
+            UUID ownerId = UUID.fromString(ownerId1);
+            Exam_Type examType1 = Exam_Type.valueOf(examType);
+            Category_Type categoryType1 = Category_Type.valueOf(categoryType);
+
+            Test test = new Test(testId, title, examType1, categoryType1, ownerId);
+            tests.add(test);
+        }
+        if (tests.size() > 0) {
+            int count = 1;
+            boolean isExited = false;
+
+            while (!isExited) {
+                for (Test test : tests) {
+                    System.out.println(count + ". Test name -> " + test.getTitle());
+                }
+
+                System.out.print("Birorta testni tanlang -> ");
+                int chooseTest = scannerInt.nextInt();
+
+                System.out.println("""
+                        #. Update
+                        *. Delete
+                        0. Exit
+                        >>\s""");
+                String s = scannerStr.nextLine();
+                switch (s) {
+                    case "0" -> isExited = true;
+                    default -> System.out.println("Notog'ri buyrug' kiritdingiz!");
+                }
+            }
+            System.out.println("⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼" + "\n");
+        } else {
+            System.out.println("Sizda birorta ham test mavjud emas!" + "\n");
+        }
     }
 
     private void StartTest() {
+
     }
 
     @SneakyThrows
     public void CreateTest(Connection connection) {
-        System.out.print("Choose test type(REGULAR/EXAM/BOTH);");
+        System.out.print("Choose test type(REGULAR/EXAM) -> ");
         String testType = scannerStr.nextLine();
 
-        System.out.print("Choose test category(MATH/BIOLOGY/HISTORY);");
+        System.out.print("Choose test category(MATH/BIOLOGY/HISTORY) -> ");
         String testCategory = scannerStr.nextLine();
 
         System.out.print("Enter test description: ");
@@ -172,9 +217,8 @@ public class BaseUI {
         System.out.print("Emailingizni kiriting ⇒ ");
         String email = scannerStr.nextLine();
 
-
         Student byEmail = studentService.findByEmail(email);
-        if (byEmail!=null) {
+        if (byEmail != null) {
             System.out.println("Bu email allaqachon ro'yxatdan o'tgan❗");
         } else {
             Random random = new Random();
@@ -188,7 +232,7 @@ public class BaseUI {
                 System.out.print("\nEng kamida 4 ta belgidan iborat yangi parol o'rnating ⇒ ");
                 String password = scannerStr.nextLine();
                 if (password.length() < 4) {
-                    System.out.print("Eng kamida 4 ta belgidan iborat yangi parol o'rnating ⇒ ");
+                    System.out.print("Eng kamida 4 ta belgidan iborat yangi parol o'rnating❗" + "\n");
                 } else {
                     String trimPassword = password.trim();
                     studentService.addStudent(new Student(UUID.randomUUID(), name, email, trimPassword));
