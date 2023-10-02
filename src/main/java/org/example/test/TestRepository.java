@@ -36,8 +36,8 @@ public class TestRepository {
             while (resultSet.next()) {
                 String id = resultSet.getString("id");
                 String title = resultSet.getString("title");
-                String examType = resultSet.getString("testType");
-                String examCategory = resultSet.getString("testCategory");
+                String examType = resultSet.getString("exam_type");
+                String examCategory = resultSet.getString("category_type");
                 String ownerUUID = resultSet.getString("owner_id");
 
                 Test test = new Test(UUID.fromString(id), title, TestType.valueOf(examType), TestCategory.valueOf(examCategory), UUID.fromString(ownerUUID));
@@ -62,6 +62,8 @@ public class TestRepository {
             while (resultSet.next()) {
                 String id = resultSet.getString("id");
                 String title = resultSet.getString("title");
+                String examType = resultSet.getString("exam_type");
+                String examCategory = resultSet.getString("category_type");
                 String examType = resultSet.getString("testType");
                 String examCategory = resultSet.getString("testCategory");
                 String ownerUUID = resultSet.getString("owner_id");
@@ -76,6 +78,9 @@ public class TestRepository {
     @SneakyThrows
     public Test getSingleTest(UUID testId) {
         String getQuery = """
+                select *
+                from test
+                where id = ?
                 select * from test where id = ?
                 """;
 
@@ -88,6 +93,8 @@ public class TestRepository {
 
             String id = resultSet.getString("id");
             String title = resultSet.getString("title");
+            String examType = resultSet.getString("exam_type");
+            String examCategory = resultSet.getString("category_type");
             String examType = resultSet.getString("testType");
             String examCategory = resultSet.getString("testCategory");
             String ownerUUID = resultSet.getString("owner_id");
@@ -154,5 +161,4 @@ public class TestRepository {
     public static TestRepository getInstance() {
         return testRepository;
     }
-
 }

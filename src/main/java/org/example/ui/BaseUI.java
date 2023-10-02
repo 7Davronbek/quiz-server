@@ -3,6 +3,9 @@ package org.example.ui;
 import static org.example.Main.scannerInt;
 import static org.example.Main.wrongCommand;
 
+import static org.example.Main.scannerInt;
+import static org.example.Main.wrongCommand;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import lombok.SneakyThrows;
