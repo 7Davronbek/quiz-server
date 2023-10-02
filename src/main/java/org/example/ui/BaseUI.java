@@ -1,33 +1,25 @@
 package org.example.ui;
 
-
 import static org.example.Main.scannerInt;
 import static org.example.Main.wrongCommand;
 
 import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.*;
 import lombok.SneakyThrows;
 import org.example.database.Database;
-import org.example.student.Student;
-import org.example.student.StudentService;
-import org.example.test.Category_Type;
-import org.example.test.Exam_Type;
-import org.example.test.Test;
+import org.example.student.*;
+import org.example.test.*;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.*;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 
 import static org.example.Main.*;
 
 public class BaseUI {
+    private static final TestService testService = TestService.getInstance();
     private static final StudentService studentService = StudentService.getInstance();
 
     public void quizstart() throws SQLException, MessagingException, IOException {
@@ -43,12 +35,6 @@ public class BaseUI {
             switch (command) {
                 case 1 -> signUp();
                 case 2 -> logIn();
-                case 1 -> {
-                    signUp();
-                }
-                case 2 -> {
-                    logIn();
-                }
                 case 0 -> isExit = true;
                 default -> wrongCommand();
             }
@@ -71,7 +57,7 @@ public class BaseUI {
         boolean passwordMatches = BCrypt.checkpw(password, byEmail.getPassword());
 
         if (passwordMatches) {
-            System.out.println("Muvafaqiyatli kirdinggiz \n");
+            System.out.println("Muvafaqiyatli kirdingiz! \n");
             boolean istrue = true;
             while (istrue) {
                 System.out.print("""
@@ -87,9 +73,9 @@ public class BaseUI {
                     case 1 -> CreateTest(Database.getConnection());
                     case 2 -> StartTest();
                     case 3 -> MyTests(byEmail.getId());
-                    case 4 -> SolvedTests();
+                    case 4 -> solvedTests();
                     case 0 -> istrue = false;
-                    default -> System.out.println("Notog'ri son kiritinggiz");
+                    default -> wrongCommand();
                 }
             }
         } else {
@@ -99,68 +85,82 @@ public class BaseUI {
 
 
     @SneakyThrows
-    private void SolvedTests() {
+    private void solvedTests() {
 
     }
 
     @SneakyThrows
     private void MyTests(UUID studentId) {
         Student byStudentId = studentService.findByStudentId(studentId);
-
-        Connection connection = Database.getConnection();
-        String query = """
-                select * from test where owner_id = ?
-                """;
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setObject(1, byStudentId.getId());
-        ResultSet resultSet = preparedStatement.executeQuery();
-        List<Test> tests = new ArrayList<>();
-
-        while (resultSet.next()) {
-            String uuid = resultSet.getString("id");
-            UUID testId = UUID.fromString(uuid);
-            String title = resultSet.getString("title");
-            String examType = resultSet.getString("exam_type");
-            String categoryType = resultSet.getString("category_type");
-            String ownerId1 = resultSet.getString("owner_id");
-            UUID ownerId = UUID.fromString(ownerId1);
-            Exam_Type examType1 = Exam_Type.valueOf(examType);
-            Category_Type categoryType1 = Category_Type.valueOf(categoryType);
-
-            Test test = new Test(testId, title, examType1, categoryType1, ownerId);
-            tests.add(test);
-        }
+        List<Test> tests = testService.getAllTests();
         if (tests.size() > 0) {
             int count = 1;
-            boolean isExited = false;
-
-            while (!isExited) {
-                for (Test test : tests) {
-                    System.out.println(count + ". Test name -> " + test.getTitle());
-                }
-
-                System.out.print("Birorta testni tanlang -> ");
-                int chooseTest = scannerInt.nextInt();
-
-                System.out.println("""
-                        #. Update
-                        *. Delete
-                        0. Exit
-                        >>\s""");
-                String s = scannerStr.nextLine();
-                switch (s) {
-                    case "0" -> isExited = true;
-                    default -> System.out.println("Notog'ri buyrug' kiritdingiz!");
+            for (Test test : tests) {
+                System.out.println(count + ". Test name -> " + test.getTitle());
+            }
+            System.out.println("0.Exit");
+            System.out.print("Birorta testni tanlang -> ");
+            int chooseTest = scannerInt.nextInt();
+            if (chooseTest != 0) {
+                Test test = tests.get(chooseTest - 1);
+                boolean isExited = false;
+                while (!isExited) {
+                    System.out.print("""
+                            #. Update
+                            *. Delete
+                            0. Exit
+                            >>\s""");
+                    String s = scannerStr.nextLine();
+                    switch (s) {
+                        case "#" -> updateTest(test.getId(), byStudentId.getId(), test);
+                        case "*" -> deleteTest(test);
+                        case "0" -> isExited = true;
+                        default -> wrongCommand();
+                    }
                 }
             }
-            System.out.println("⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼⎼" + "\n");
         } else {
             System.out.println("Sizda birorta ham test mavjud emas!" + "\n");
         }
     }
 
-    private void StartTest() {
+    private void deleteTest(Test test) {
+        testService.deleteTest(test.getId(), test.getOwnerId());
+        System.out.println("Test muvaffaqiyatli o'chirildi!" + "\n");
+    }
 
+    @SneakyThrows
+    private void updateTest(UUID TestId, UUID studentId, Test test) {
+        String updateQuery = """
+                update test set title = ?, testtype = ?::test_type_enum, testcategory = ?::testcategory_enum;
+                """;
+        Connection connection = Database.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+
+        System.out.print("Yangi test title ni kiriting(%s) -> ".formatted(test.getTitle()));
+        String newTitle = scannerStr.nextLine();
+
+        System.out.print("Yangi test type ni kiriting(%s) -> ".formatted(test.getTestType()));
+        String newTestType = scannerStr.nextLine();
+
+        System.out.print("Yangi test category type ni kiriting(%s) -> ".formatted(test.getTestCategory()));
+        String newCategoryType = scannerStr.nextLine();
+
+        preparedStatement.setString(1, newTitle.isBlank() ? test.getTitle() : newTitle);
+        preparedStatement.setString(2, newTestType.isBlank() ? String.valueOf(test.getTestType()) : newTestType);
+        preparedStatement.setString(3, newCategoryType.isBlank() ? String.valueOf(test.getTestCategory()) : newCategoryType);
+
+        preparedStatement.executeUpdate();
+        if (newTitle.isBlank() && newCategoryType.isBlank() && newTestType.isBlank()) {
+            System.out.println("Hech qanday o'zgartirish kiritilmadi!");
+        } else {
+            System.out.println("Test o'zgartirildi!" + "\n");
+        }
+    }
+
+
+    private void StartTest() {
+        
     }
 
     @SneakyThrows
@@ -174,41 +174,37 @@ public class BaseUI {
         System.out.print("Enter test description: ");
         String desc = scannerStr.nextLine();
 
-        String insertTestQuary = "INSERT INTO test(id,title,exam_type,category_type,owner_id) VALUES (?::uuid,?,?::exam_type_enum,?::category_type_enum,CAST(? AS UUID))";
+        String insertTestQuary = "INSERT INTO test(title,exam_type,category_type,owner_id) VALUES (?::uuid,?,?::exam_type_enum,?::category_type_enum,CAST(? AS UUID))";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertTestQuary)) {
-            UUID uuid = UUID.randomUUID();
-            String stringUUID = uuid.toString();
-            preparedStatement.setString(1, stringUUID);
-            preparedStatement.setString(2, desc);
-            preparedStatement.setString(3, testType);
-            preparedStatement.setString(4, testCategory);
-            preparedStatement.setString(5, "19790fa8-e57c-432d-884a-e59a297d62f5");
+            preparedStatement.setString(1, desc);
+            preparedStatement.setString(2, testType);
+            preparedStatement.setString(3, testCategory);
+            preparedStatement.setString(4, "19790fa8-e57c-432d-884a-e59a297d62f5");
 
             preparedStatement.execute();
-           /* System.out.println("Test has been created successfully.");
+            System.out.println("Test has been created successfully.");
 
-            System.out.print("Enter option name: ");
-            String optionName=scannerStr.nextLine();
-
-            System.out.print("Is correct answer(T/F); ");
-            String isCorrect = scannerStr.nextLine();
-            boolean isTrue = isCorrect.equals("T");
-
-            String insertOptionQuery = "INSERT INTO option(id,option_name,is_correct)VALUES(?::uuid,?,?)";
-
-            try(PreparedStatement preparedStatement1=connection.prepareStatement(insertOptionQuery)){
-                preparedStatement1.setString(1,stringUUID);
-                preparedStatement1.setString(2,optionName);
-                preparedStatement1.setString(3,isCorrect);
-
-                preparedStatement1.execute();
-                System.out.println("Variantlar qabul qilindi.");
-            }*/
+//            System.out.print("Enter option name: ");
+//            String optionName = scannerStr.nextLine();
+//
+//            System.out.print("Is correct answer(T/F); ");
+//            String isCorrect = scannerStr.nextLine();
+//            boolean isTrue = isCorrect.equals("T");
+//
+//            String insertOptionQuery = "INSERT INTO option(id,option_name,is_correct)VALUES(?::uuid,?,?)";
+//
+//            try (PreparedStatement preparedStatement1 = connection.prepareStatement(insertOptionQuery)) {
+//                preparedStatement1.setString(1, stringUUID);
+//                preparedStatement1.setString(2, optionName);
+//                preparedStatement1.setString(3, isCorrect);
+//
+//                preparedStatement1.execute();
+//                System.out.println("Variantlar qabul qilindi.");
+//            }
         }
 
     }
-
 
     private void signUp() throws MessagingException, IOException {
         System.out.print("Ismingizni kiriting ⇒ ");
