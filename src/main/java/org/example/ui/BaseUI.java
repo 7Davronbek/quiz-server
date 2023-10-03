@@ -106,7 +106,6 @@ public class BaseUI {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setObject(1, byStudentId.getId());
         ResultSet resultSet = preparedStatement.executeQuery();
-        List<Test> tests = new ArrayList<>();
 
         while (resultSet.next()) {
             String uuid = resultSet.getString("id");
@@ -116,13 +115,12 @@ public class BaseUI {
             String categoryType = resultSet.getString("category_type");
             String ownerId1 = resultSet.getString("owner_id");
             UUID ownerId = UUID.fromString(ownerId1);
-            Exam_Type examType1 = Exam_Type.valueOf(examType);
             Category_Type categoryType1 = Category_Type.valueOf(categoryType);
 
             /*Test test = new Test(testId, title, examType1, categoryType1, ownerId);*/
             /*tests.add(test);*/
         }
-      
+
         if (tests.size() > 0) {
             int count = 1;
             for (Test test : tests) {
@@ -190,7 +188,7 @@ public class BaseUI {
 
 
     private void StartTest() {
-        
+
     }
 
     @SneakyThrows
@@ -268,8 +266,8 @@ public class BaseUI {
                     System.out.println("Variantlar qabul qilindi.");
                     System.out.println("Yana varinantlar bormi(XA/YOQ)");
                     String answer = scannerStr.nextLine();
-                    if(!answer.equals("XA")){
-                        chek=false;
+                    if (!answer.equals("XA")) {
+                        chek = false;
                     }
                 }
             }

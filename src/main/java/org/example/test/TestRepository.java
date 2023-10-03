@@ -64,6 +64,7 @@ public class TestRepository {
                 String title = resultSet.getString("title");
                 String examType = resultSet.getString("exam_type");
                 String examCategory = resultSet.getString("category_type");
+
                 String examType = resultSet.getString("testType");
                 String examCategory = resultSet.getString("testCategory");
                 String ownerUUID = resultSet.getString("owner_id");
@@ -95,6 +96,7 @@ public class TestRepository {
             String title = resultSet.getString("title");
             String examType = resultSet.getString("exam_type");
             String examCategory = resultSet.getString("category_type");
+
             String examType = resultSet.getString("testType");
             String examCategory = resultSet.getString("testCategory");
             String ownerUUID = resultSet.getString("owner_id");
