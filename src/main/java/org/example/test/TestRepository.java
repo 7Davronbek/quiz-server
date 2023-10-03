@@ -64,8 +64,9 @@ public class TestRepository {
                 String title = resultSet.getString("title");
                 String examType = resultSet.getString("exam_type");
                 String examCategory = resultSet.getString("category_type");
-//                String examType = resultSet.getString("testType");
-//                String examCategory = resultSet.getString("testCategory");
+
+                String examType = resultSet.getString("testType");
+                String examCategory = resultSet.getString("testCategory");
                 String ownerUUID = resultSet.getString("owner_id");
 
                 Test test = new Test(UUID.fromString(id), title, TestType.valueOf(examType), TestCategory.valueOf(examCategory), UUID.fromString(ownerUUID));
@@ -95,8 +96,9 @@ public class TestRepository {
             String title = resultSet.getString("title");
             String examType = resultSet.getString("exam_type");
             String examCategory = resultSet.getString("category_type");
-//            String examType = resultSet.getString("testType");
-//            String examCategory = resultSet.getString("testCategory");
+
+            String examType = resultSet.getString("testType");
+            String examCategory = resultSet.getString("testCategory");
             String ownerUUID = resultSet.getString("owner_id");
             return new Test(UUID.fromString(id), title, TestType.valueOf(examType), TestCategory.valueOf(examCategory), UUID.fromString(ownerUUID));
 
